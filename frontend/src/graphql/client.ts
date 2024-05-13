@@ -14,3 +14,12 @@ export const GET_ALL_COUNTRIES = gql`
     }
   }
 `;
+
+export const GET_ALL_CONTINENTS = gql`
+  query Query {
+    continents {
+      id
+      name
+    }
+  }
+`;

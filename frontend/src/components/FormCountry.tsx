@@ -1,9 +1,14 @@
-import { GET_ALL_COUNTRIES } from "@/graphql/client";
+import { GET_ALL_CONTINENTS, GET_ALL_COUNTRIES } from "@/graphql/client";
 import { ADD_NEW_COUNTRY } from "@/graphql/mutation";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 
 const AddCountryForm = () => {
   const [addCountry, { loading, error }] = useMutation(ADD_NEW_COUNTRY);
+  const {
+    loading: loadingContinents,
+    error: errorContinents,
+    data: continentData,
+  } = useQuery(GET_ALL_CONTINENTS);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -11,10 +16,13 @@ const AddCountryForm = () => {
     const name = e.target.name.value;
     const code = e.target.code.value;
     const emoji = e.target.emoji.value;
+    const continentId = e.target.continent.value;
+
+    const continent = { id: continentId };
 
     addCountry({
       variables: {
-        data: { name, code, emoji },
+        data: { name, code, emoji, continent },
       },
       refetchQueries: [{ query: GET_ALL_COUNTRIES }],
     });
@@ -71,10 +79,35 @@ const AddCountryForm = () => {
             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+        <div className="mb-4 md:col-span-3">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="continent"
+          >
+            Continent
+          </label>
+          {loadingContinents ? (
+            <p>Loading continents...</p>
+          ) : errorContinents ? (
+            <p>Error fetching continents: {errorContinents.message}</p>
+          ) : (
+            <select
+              name="continent"
+              id="continent"
+              className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              {continentData.continents.map((continent: any) => (
+                <option key={continent.id} value={continent.id}>
+                  {continent.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
       <button
         type="submit"
-        className="mt-4 md:col-span-3 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+        className="w-full mt-4 md:col-span-3 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
       >
         Add Country
       </button>
